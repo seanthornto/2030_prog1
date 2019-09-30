@@ -12,6 +12,12 @@ struct Node {
 	Node<dtype>* next;
 	Node<dtype>* prev;
 
+	Node<dtype>()
+	{
+		next = nullptr;
+		prev = nullptr;
+	}
+
 	bool operator==(const Node<dtype> &rhs)
 	{
 		return next == rhs.next;
@@ -126,7 +132,7 @@ public:
 		moveCursorTo(head);
 		for (int i = 0; i < size; i++)
 		{
-			cout << cursor.point->data;
+			cout << cursor.point->data << " ";
 			moveCursorRight(1);
 		}
 	}
@@ -336,10 +342,18 @@ public:
 		return tail;
 	}
 
-	void addList(MyList<dtype> list)
+	void addList(MyList<dtype> *list)
 	{
-		tail->next = list.head;
-		tail = list.tail;
+		if (list->head != nullptr) {
+			if (isEmpty()) {
+				head = list->head;
+				tail = list->tail;
+			}
+			tail->next = list->head;
+			tail = list->tail;
+		}
+		size += list->size;
+		
 	}
 
 };
