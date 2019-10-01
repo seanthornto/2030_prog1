@@ -2,9 +2,9 @@ Program #1
 
 COSC 2030
 
-Name:
+Name: Sean Thornton
 
-Competing: YES or NO
+Competing: YES
 
 Best run time:
 
