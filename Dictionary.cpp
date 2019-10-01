@@ -9,283 +9,303 @@ using namespace std;
 Dictionary::Dictionary(string filename)
 {
 	words = new MyList<string>();
-	top100 = *new vector<Mark<string>>(20);
-	top1000 = *new vector<Mark<string>>(20);
-	theRest = *new vector<Mark<string>>(20);
+	
+
 	string line;
 	ifstream file;
-	
-
+	int length;
+	foundCompares = 0;
+	notFoundCompares = 0;
+	compares = 0;
+	int i = 0;
 	file.open("top100.txt");
 	if (file.is_open()) {
+		getline(file, line);
 		while (!file.eof())
 		{
+			cleanWord(line);
+			length = line.length();
+			if (length > 20) length = 20;
+			insertAlpha(&line, &top100[length - 1]);
 			getline(file, line);
-			line = toLower(line);
-			cout << line << endl;
-			insertAlpha(line, 0);
-			
 		}
+		cleanWord(line);
+		length = line.length();
+		if (length > 20) length = 20;
+		insertAlpha(&line, &top100[length - 1]);
 	}
+	
 	file.close();
+	for (int i = 0; i < 20; i++) {
+		top100Mark[i].index = words->getSize();
+		if (!top100[i].isEmpty()) {
+			top100Mark[i].point = top100[i].getHead();
+			words->addList(&top100[i]);
+		}
+		
+	}
 
 	file.open("top1000.txt");
-		if (file.is_open()) {
-			while (!file.eof()) {
-				getline(file, line);
-				line = toLower(line);
-				insertAlpha(line, 100);
-			}
+	if (file.is_open()) {
+		getline(file, line);
+		while (!file.eof())
+		{
+			cleanWord(line);
+			length = line.length();
+			if (length > 20) length = 20;
+			insertAlpha(&line, &top1000[length - 1]);
+			getline(file, line);
 		}
+		cleanWord(line);
+		length = line.length();
+		if (length > 20) length = 20;
+		insertAlpha(&line, &top1000[length - 1]);
+	}
+	file.close();
+
+	for (int i = 0; i < 20; i++) {
+		top1000Mark[i].index = words->getSize();
+		if (!top1000[i].isEmpty()) {
+			top1000Mark[i].point = top1000[i].getHead();
+			words->addList(&top1000[i]);
+		}
+	}
+
+
+	file.open(filename);
+	if (file.is_open()) {
+		getline(file, line);
+		
+		while (!file.eof())
+		{
+			cleanWord(line);
+			length = line.length();
+			if (length > 20) length = 20;
+			if (!inTop100(line) && !inTop1000(line)) insertAlpha(&line, &theRest[length - 1]);
+			getline(file, line);
+		}
+		cleanWord(line);
+		length = line.length();
+		if (length > 20) length = 20;
+		if (!inTop100(line) && !inTop1000(line)) insertAlpha(&line, &theRest[length - 1]);
+	}
 	file.close();
 	
-	//file.open(filename);
-	//if (file.is_open()) {
-	//	while (!file.eof()) {
-	//		getline(file, line);
-	//		line = toLower(line);
-	//		if (!inTop100(line) && !inTop1000(line)) insertAlpha(line, 1000);
-	//	}
-	//}
-}
 
-string Dictionary::toLower(string word)
-{
-	for (char &c : word) c = toLower(c);
-	return word;
-}
-
-char Dictionary::toLower(char c)
-{
-	if (c >= 'A' && c <= 'Z') c += 32;
-	return c;
-}
-
-void Dictionary::insertAlpha(string word, int after)
-{
-	Mark<string>* mark = new Mark<string>();
-	int length = word.length();
-	if (length > 20) length = 20;
-	Node<string>* temp;
-	bool found = false;
-	int index = -1;
-	if (after == 0) {
-		cout << top100[length - 1].index << endl;
-		if (words->isEmpty()) {
-			temp = words->pushNode(word);
-			index = 0;
-			mark = new Mark<string>(temp, 0);
-			top100[length - 1] = *mark;
-		}
-		else if (top100[length - 1].index == -1) {
-			for (int i = length - 2; i >= 0; i--) {
-				if (top100[i].index != -1) {
-					words->moveCursorTo(top100[i]);
-					while (true) {
-						if (words->getCursor().point->data.length() > (unsigned) (i + 1)) {
-							temp = words->insertBefore(words->getCursor().point, word);
-							index = words->getCursor().index - 1;
-							mark = new Mark<string>(temp, index);
-							top100[length - 1] = *mark;
-							
-							break;
-						}
-						if (words->getCursor().point == words->getTail()) {
-							temp = words->appendNode(word);
-							index = words->getCursor().index + 1;
-							mark = new Mark<string>(temp, index);
-							top100[length - 1] = *mark;
-							break;
-						}
-						words->moveCursorRight(1);
-					}
-					found = true;
-					break;
-				}
-			}
-			if (!found) {
-				temp = words->pushNode(word);
-				index = 0;
-				mark = new Mark<string>(temp, index);
-				top100[length - 1] = *mark;
-			}
-		}
-		else {
-			int end;
-			if (top100[length].index == -1) {
-				while (words->moveCursorRight(1)) {
-					if (words->getCursor().point->data.length() != length - 1) {
-						words->moveCursorLeft(1);
-						break;
-					}
-				}
-				end = words->getCursor().index;
-			}
-			else end = top100[length].index;
-			if (insertAlpha(&word, top100[length - 1].index, end)) {
-				Mark<string> cursor = words->getCursor();
-				index = cursor.index - 1;
-				if (cursor.point == top100[length - 1].point) {
-					top100[length - 1].point = cursor.point->prev;
-					top100[length - 1].index = index;
-				}
-			}
-			else index = words->getCursor().index + 1;
-		}
-		cout << index << endl;
-		
-		for (Mark<string> m : top100) if (m.index > index) m.index++;
-	}
-	if (after = 100) {
-		if (top1000[length - 1].index == -1)	{
-			for (int i = length - 2; i >= 0; i--) {
-				if (!(top1000[i].index == -1)) {
-					words->moveCursorTo(top1000[i]);
-					while (true) {
-						if (words->getCursor().point->data.length() > (unsigned)(i + 1)) {
-							temp = words->insertBefore(words->getCursor().point, word);
-							index = words->getCursor().index - 1;
-							mark = new Mark<string>(temp,index);
-							top1000[length - 1] = *mark;
-							break;
-						}
-						if (words->getCursor().point == words->getTail()) {
-							temp = words->appendNode(word);
-							index = words->getCursor().index + 1;
-							mark = new Mark<string>(temp,index);
-							top1000[length - 1] = *mark;
-							break;
-						}
-						words->moveCursorRight(1);
-					}
-					found = true;
-					break;
-				}	
-			}
-			if (!found) {
-				temp = words->appendNode(word);
-				index = words->getSize() - 1;
-				mark = mark = new Mark<string>(temp, index);
-				top1000[length - 1] = *mark;
-			}
-		}
-		else {
-			int end;
-			if (top1000[length].index == -1) {
-				while (words->moveCursorRight(1)) {
-					if (words->getCursor().point->data.length() != length - 1) {
-						words->moveCursorLeft(1);
-						break;
-					}
-				}
-				end = words->getCursor().index;
-			} 
-			else end = top1000[length].index;
-
-			if (insertAlpha(&word, top1000[length - 1].index, end)) {
-				Mark<string> cursor = words->getCursor();
-				index = cursor.index - 1;
-				if (cursor.point == top100[length - 1].point) {
-					top1000[length - 1].point = cursor.point->prev;
-					top1000[length - 1].index = cursor.index - 1;
-				}
-			}
-			else index = words->getCursor().index + 1;
-		}
-
-		for (Mark<string> m : top1000) if (m.index > index) m.index++;
-	}
-
-	if (after = 1000) {
-		if (theRest[length - 1].index == -1) {
-			for (int i = length - 2; i >= 0; i--) {
-				if (!(theRest[i].index == -1)) {
-					words->moveCursorTo(theRest[i]);
-					while (true) {
-						if (words->getCursor().point->data.length() > (unsigned)(i + 1)) {
-							temp = words->insertBefore(words->getCursor().point, word);
-							index = words->getCursor().index - 1;
-							mark = new Mark<string>(temp, index);
-							theRest[length - 1] = *mark;
-							break;
-						}
-						if (words->getCursor().point == words->getTail()) {
-							temp = words->appendNode(word);
-							index = words->getCursor().index + 1;
-							mark = new Mark<string>(temp, index);
-							theRest[length - 1] = *mark;
-							break;
-						}
-						words->moveCursorRight(1);
-					}
-					found = true;
-					break;
-				}
-			}
-			if (!found) {
-				temp = words->appendNode(word);
-				index = words->getSize() - 1;
-				mark = mark = new Mark<string>(temp, index);
-				theRest[length - 1] = *mark;
-			}
-		}
-		else {
-			int end;
-			if (theRest[length].index == -1) {
-				while (words->moveCursorRight(1)) {
-					if (words->getCursor().point->data.length() != length - 1) {
-						words->moveCursorLeft(1);
-						break;
-					}
-				}
-				end = words->getCursor().index;
-			}
-			else end = theRest[length].index;
-			if (insertAlpha(&word, theRest[length - 1].index, end)) {
-				Mark<string> cursor = words->getCursor();
-				index = cursor.index - 1;
-				if (cursor.point == top100[length - 1].point) {
-					theRest[length - 1].point = cursor.point->prev;
-					theRest[length - 1].index = cursor.index - 1;
-				}
-			}
-			else index = words->getCursor().index + 1;
+	for (int i = 0; i < 20; i++) {
+		theRestMark[i].index = words->getSize();
+		if (!theRest[i].isEmpty()) {
+			theRestMark[i].point = theRest[i].getHead();
+			words->addList(&theRest[i]);
 		}
 	}
+	
+	foundCompares = 0;
+	notFoundCompares = 0;
 }
 
-bool Dictionary::insertAlpha(string *word, int start, int end)
+void Dictionary::cleanWord(string &word)
+{
+	string result = "";
+	for (char &c : word) {
+		if ('a' <= c && c <= 'z') result += c;
+		else if (c < 'A') {
+			if ((c == 39) || ('0' <= c && c <= '9')) result += c;
+		}
+		else if (c <= 'Z') {
+			toLower(c);
+			result += c;
+		}
+	}
+	word = result;
+}
+
+void Dictionary::toLower(char &c)
+{
+	 c += 32;
+}
+
+void Dictionary::insertAlpha(string *word, MyList<string> *list)
+{
+	if (list->isEmpty()) list->pushNode(*word);
+	else insertAlpha(word, 0, list->getSize() - 1, list);
+	list->resetCursor();
+}
+
+void Dictionary::insertAlpha(string *word, int start, int end, MyList<string> *list)
 {
 	int compare;
-	if (start != end) {
+	if (start < end) {
 		int midpoint = (end + start) / 2;
-		words->moveCursorTo(midpoint);
-		compare = word->compare(words->getCursor().point->data);
+		list->moveCursorTo(midpoint);
+		compare = word->compare(list->getCursor().point->data);
 		if (compare < 0)
 		{
-			return insertAlpha(word, start, midpoint - 1);
+			return insertAlpha(word, start, midpoint - 1, list);
 		}
 		else if (compare > 0)
 		{
-			return insertAlpha(word, midpoint + 1, end);
+			return insertAlpha(word, midpoint + 1, end, list);
 		}
 	}
 	else {
-		words->moveCursorTo(start);
-		compare = word->compare(words->getCursor().point->data);
+		list->moveCursorTo(start);
+		compare = word->compare(list->getCursor().point->data);
 		if (compare < 0) {
-			words->insertBefore(words->getCursor().point, *word);
-			return true;
+			list->insertBefore(list->getCursor().point, *word);
 		}
 		else if (compare > 0) {
-			words->insertAfter(words->getCursor().point, *word);
-			return false;
+			list->insertAfter(list->getCursor().point, *word);
 		}
 	}
-	return false;
 }
 
-void Dictionary::print()
+
+bool Dictionary::inTop100(string word)
 {
-	words->print();
+	int length = word.length();
+	if (length > 20) length = 20;
+	int start = top100Mark[length - 1].index;
+	int end;
+	if (length < 20) end = top100Mark[length].index - 1;
+	else end = 99;
+	if (end < start) return false;
+	words->moveCursorTo(top100Mark[length - 1]);
+	return find(&word, start, end);
+}
+
+bool Dictionary::inTop1000(string word)
+{
+	int length = word.length();
+	if (length > 20) length = 20;
+	int start = top1000Mark[length - 1].index;
+	int end;
+	if (length < 20) end = top1000Mark[length].index - 1;
+	else end = 999;
+	if (end < start) return false;
+	words->moveCursorTo(top1000Mark[length - 1]);
+	return find(&word, start, end);
+}
+
+bool Dictionary::inTheRest(string word)
+{
+	int length = word.length();
+	if (length > 20) length = 20;
+	int start = theRestMark[length - 1].index;
+	int end;
+	if (length < 20) end = theRestMark[length].index - 1;
+	else end = words->getSize() - 1;
+	if (end < start) return false;
+	words->moveCursorTo(theRestMark[length - 1]);
+	return find(&word, start, end);
+}
+
+bool Dictionary::inDictionary(string word)
+{
+	return inTop100(word) || inTop1000(word) || inTheRest(word);
+}
+
+bool Dictionary::find(string *word, int start, int end)
+{
+	int mid = (start + end) / 2;
+	int range = end - start;
+	
+	words->moveCursorTo(mid);
+	Mark<string> cursor = words->getCursor();
+	
+	int compare = word->compare(cursor.point->data);
+	compares++;
+	
+	if (range > 3) {
+		if (compare < 0) return find(word, start, mid - 1);
+		else if (compare > 0) return find(word, mid + 1, end);
+		else {
+			foundCompares += compares;
+			compares = 0;
+			return true;
+		}
+	}
+
+	else if (range == 3) {
+		if (compare < 0) {
+			compare = word->compare(cursor.point->prev->data);
+			compares++;
+			if (compare == 0) {
+				foundCompares += compares;
+				compares = 0;
+				return true;
+			}
+			else {
+				notFoundCompares += compares;
+				compares = 0;
+				return false;
+			}
+		}
+		else if (compare > 0) return find(word, mid + 1, end);
+		else {
+			foundCompares += compares;
+			compares = 0;
+			return true;
+		}
+	}
+
+	else if (range == 2) {
+		if (compare < 0) {
+			compare = word->compare(cursor.point->prev->data);
+			compares++;
+			if (compare == 0) {
+				foundCompares += compares;
+				compares = 0;
+				return true;
+			}
+			else {
+				notFoundCompares += compares;
+				compares = 0;
+				return false;
+			}
+
+		}
+		else if (compare > 0) {
+			compare = word->compare(cursor.point->next->data);
+			compares++;
+			if (compare == 0) {
+				foundCompares += compares;
+				compares = 0;
+				return true;
+			}
+			else {
+				notFoundCompares += compares;
+				compares = 0;
+				return false;
+			}
+		}
+		else {
+			foundCompares += compares;
+			compares = 0;
+			return true;
+		}
+	}
+
+	else if (range == 1) {
+		if (compare == 0) {
+			foundCompares += compares;
+			compares = 0;
+			return true;
+		}
+		else {
+			compare = word->compare(cursor.point->next->data);
+			compares++;
+			if (compare == 0) {
+				foundCompares += compares;
+				compares = 0;
+				return true;
+			}
+			else {
+				notFoundCompares += compares;
+				compares = 0;
+				return false;
+			}
+		}	
+	}
+	else return compare == 0;
 }

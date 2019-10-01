@@ -12,6 +12,12 @@ struct Node {
 	Node<dtype>* next;
 	Node<dtype>* prev;
 
+	Node<dtype>()
+	{
+		next = nullptr;
+		prev = nullptr;
+	}
+
 	bool operator==(const Node<dtype> &rhs)
 	{
 		return next == rhs.next;
@@ -49,7 +55,7 @@ public:
 		cursor.index = -1;
 	}
 
-	~MyList() 
+	~MyList()
 	{
 		while (!isEmpty())
 		{
@@ -90,6 +96,7 @@ public:
 
 	bool moveCursorRight(int n)
 	{
+		
 		for (int i = 0; i < n; i++) {
 			if (cursor.point == tail) return false;
 			cursor.point = cursor.point->next;
@@ -115,7 +122,7 @@ public:
 			return moveCursorLeft(cursor.index - index);
 		}
 		else if (index > cursor.index)
-		{
+		{	
 			return moveCursorRight(index - cursor.index);
 		}
 		return true;
@@ -126,11 +133,15 @@ public:
 		moveCursorTo(head);
 		for (int i = 0; i < size; i++)
 		{
-			cout << cursor.point->data;
+			cout << cursor.point->data << " ";
 			moveCursorRight(1);
 		}
 	}
 
+	void resetCursor()
+	{
+		moveCursorTo(head);
+	}
 
 	bool moveCursorTo(Node<dtype>* node)
 	{
@@ -203,7 +214,7 @@ public:
 		else if (del == cursor.point) cursor.point = cursor.point->next; //If the node the cursor is pointing to is being deleted, move the cursor right
 
 		if (del == head)							//If the head is being deleted
-		{	
+		{
 			if (size == 1)							//If it is the only node
 			{
 				head = nullptr;						//Set head and tail to null
@@ -336,10 +347,20 @@ public:
 		return tail;
 	}
 
-	void addList(MyList<dtype> list)
+	void addList(MyList<dtype> *list)
 	{
-		tail->next = list.head;
-		tail = list.tail;
+		if (list->head != nullptr) {
+			if (isEmpty()) {
+				head = list->head;
+				tail = list->tail;
+			}
+			else {
+				tail->next = list->head;
+				tail = list->tail;
+			}
+		}
+		size += list->size;
+
 	}
 
 };
