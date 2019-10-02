@@ -31,5 +31,4 @@ class Timer {
       bool running;
       clock_t startTime;
    };
-#include "timer.cpp"
 #endif
