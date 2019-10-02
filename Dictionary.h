@@ -8,12 +8,13 @@ using namespace std;
 
 class Dictionary {
 	MyList<string> *words;
-	MyList<string> top100[20];
-	MyList<string> top1000[20];
-	MyList<string> theRest[20];
-	Mark<string> top100Mark[20];
-	Mark<string> top1000Mark[20];
-	Mark<string> theRestMark[20];
+	MyList<string> top100[20][26];
+	MyList<string> top1000[20][26];
+	MyList<string> theRest[20][26];
+	Mark<string> top100Mark[20][26];
+	Mark<string> top1000Mark[20][26];
+	Mark<string> theRestMark[20][26];
+
 	int compares;
 	int foundCompares;
 	int notFoundCompares;
@@ -25,6 +26,7 @@ public:
 	bool inTop100(string word);
 	bool inTop1000(string word);
 	bool inTheRest(string word);
+	//bool findMisspelled(string *word, int start, int end);
 	bool inDictionary(string word);
 	bool find(string *word, int start, int end);
 	void insertAlpha(string *word, MyList<string> *list);
@@ -35,7 +37,7 @@ public:
 	{
 		words->print();
 	}
-	int getFoundCompares() 
+	int getFoundCompares()
 	{
 		return foundCompares;
 	}

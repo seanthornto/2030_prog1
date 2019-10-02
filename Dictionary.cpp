@@ -9,7 +9,7 @@ using namespace std;
 Dictionary::Dictionary(string filename)
 {
 	words = new MyList<string>();
-	
+
 
 	string line;
 	ifstream file;
@@ -26,24 +26,29 @@ Dictionary::Dictionary(string filename)
 			cleanWord(line);
 			length = line.length();
 			if (length > 20) length = 20;
-			insertAlpha(&line, &top100[length - 1]);
+			insertAlpha(&line, &top100[length - 1][line.at(0) - 97]);
 			getline(file, line);
 		}
 		cleanWord(line);
 		length = line.length();
 		if (length > 20) length = 20;
-		insertAlpha(&line, &top100[length - 1]);
+		insertAlpha(&line, &top100[length - 1][line.at(0) - 97]);
 	}
-	
+
 	file.close();
 	for (int i = 0; i < 20; i++) {
-		top100Mark[i].index = words->getSize();
-		if (!top100[i].isEmpty()) {
-			top100Mark[i].point = top100[i].getHead();
-			words->addList(&top100[i]);
+		for (int j = 0; j < 26; j++) {
+			top100Mark[i][j].index = words->getSize();
+			if (!top100[i][j].isEmpty()) {
+				top100Mark[i][j].point = top100[i][j].getHead();
+				words->addList(&top100[i][j]);
+			}
 		}
-		
+
 	}
+
+	
+
 
 	file.open("top1000.txt");
 	if (file.is_open()) {
@@ -53,55 +58,63 @@ Dictionary::Dictionary(string filename)
 			cleanWord(line);
 			length = line.length();
 			if (length > 20) length = 20;
-			insertAlpha(&line, &top1000[length - 1]);
+			insertAlpha(&line, &top1000[length - 1][line.at(0) - 97]);
 			getline(file, line);
 		}
 		cleanWord(line);
 		length = line.length();
 		if (length > 20) length = 20;
-		insertAlpha(&line, &top1000[length - 1]);
+		insertAlpha(&line, &top1000[length - 1][line.at(0) - 97]);
 	}
 	file.close();
 
+	
+
 	for (int i = 0; i < 20; i++) {
-		top1000Mark[i].index = words->getSize();
-		if (!top1000[i].isEmpty()) {
-			top1000Mark[i].point = top1000[i].getHead();
-			words->addList(&top1000[i]);
+		for (int j = 0; j < 26; j++) {
+			top1000Mark[i][j].index = words->getSize();
+			if (!top1000[i][j].isEmpty()) {
+				top1000Mark[i][j].point = top1000[i][j].getHead();
+				words->addList(&top1000[i][j]);
+			}
 		}
 	}
+
 
 
 	file.open(filename);
 	if (file.is_open()) {
 		getline(file, line);
-		
 		while (!file.eof())
 		{
 			cleanWord(line);
 			length = line.length();
 			if (length > 20) length = 20;
-			if (!inTop100(line) && !inTop1000(line)) insertAlpha(&line, &theRest[length - 1]);
+			if (!inTop100(line) && !inTop1000(line)) insertAlpha(&line, &theRest[length - 1][line.at(0) - 97]);
 			getline(file, line);
 		}
 		cleanWord(line);
 		length = line.length();
 		if (length > 20) length = 20;
-		if (!inTop100(line) && !inTop1000(line)) insertAlpha(&line, &theRest[length - 1]);
+		if (!inTop100(line) && !inTop1000(line)) insertAlpha(&line, &theRest[length - 1][line.at(0) - 97]);
 	}
 	file.close();
-	
 
+	
 	for (int i = 0; i < 20; i++) {
-		theRestMark[i].index = words->getSize();
-		if (!theRest[i].isEmpty()) {
-			theRestMark[i].point = theRest[i].getHead();
-			words->addList(&theRest[i]);
+		for (int j = 0; j < 26; j++) {
+			theRestMark[i][j].index = words->getSize();
+			if (!theRest[i][j].isEmpty()) {
+				theRestMark[i][j].point = theRest[i][j].getHead();
+				words->addList(&theRest[i][j]);
+			}
 		}
 	}
-	
+
 	foundCompares = 0;
 	notFoundCompares = 0;
+	compares = 0;
+	
 }
 
 void Dictionary::cleanWord(string &word)
@@ -122,7 +135,7 @@ void Dictionary::cleanWord(string &word)
 
 void Dictionary::toLower(char &c)
 {
-	 c += 32;
+	c += 32;
 }
 
 void Dictionary::insertAlpha(string *word, MyList<string> *list)
@@ -139,6 +152,7 @@ void Dictionary::insertAlpha(string *word, int start, int end, MyList<string> *l
 		int midpoint = (end + start) / 2;
 		list->moveCursorTo(midpoint);
 		compare = word->compare(list->getCursor().point->data);
+		compares++;
 		if (compare < 0)
 		{
 			return insertAlpha(word, start, midpoint - 1, list);
@@ -151,6 +165,7 @@ void Dictionary::insertAlpha(string *word, int start, int end, MyList<string> *l
 	else {
 		list->moveCursorTo(start);
 		compare = word->compare(list->getCursor().point->data);
+		compares++;
 		if (compare < 0) {
 			list->insertBefore(list->getCursor().point, *word);
 		}
@@ -165,25 +180,29 @@ bool Dictionary::inTop100(string word)
 {
 	int length = word.length();
 	if (length > 20) length = 20;
-	int start = top100Mark[length - 1].index;
+	if (top100[length - 1][word.at(0) - 97].isEmpty()) return false;
+	int start = top100Mark[length - 1][word.at(0) - 97].index;
 	int end;
-	if (length < 20) end = top100Mark[length].index - 1;
+	if (length < 20 || word.at(0) != 'z') end = top100Mark[length - 1][word.at(0) - 96].index - 1;
 	else end = 99;
 	if (end < start) return false;
-	words->moveCursorTo(top100Mark[length - 1]);
+	words->moveCursorTo(top100Mark[length - 1][word.at(0) - 97]);
 	return find(&word, start, end);
+	
 }
 
 bool Dictionary::inTop1000(string word)
 {
+
 	int length = word.length();
 	if (length > 20) length = 20;
-	int start = top1000Mark[length - 1].index;
+	if (top1000[length - 1][word.at(0) - 97].isEmpty()) return false;
+	int start = top1000Mark[length - 1][word.at(0) - 97].index;
 	int end;
-	if (length < 20) end = top1000Mark[length].index - 1;
+	if (length < 20 || word.at(0) != 'z') end = top1000Mark[length - 1][word.at(0) - 96].index - 1;
 	else end = 999;
 	if (end < start) return false;
-	words->moveCursorTo(top1000Mark[length - 1]);
+	words->moveCursorTo(top1000Mark[length - 1][word.at(0) - 97]);
 	return find(&word, start, end);
 }
 
@@ -191,37 +210,109 @@ bool Dictionary::inTheRest(string word)
 {
 	int length = word.length();
 	if (length > 20) length = 20;
-	int start = theRestMark[length - 1].index;
+	if (theRest[length - 1][word.at(0) - 97].isEmpty()) return false;
+	int start = theRestMark[length - 1][word.at(0) - 97].index;
 	int end;
-	if (length < 20) end = theRestMark[length].index - 1;
+	if (length < 20 || word.at(0) != 'z') end = theRestMark[length - 1][word.at(0) - 96].index - 1;
 	else end = words->getSize() - 1;
 	if (end < start) return false;
-	words->moveCursorTo(theRestMark[length - 1]);
+	words->moveCursorTo(theRestMark[length - 1][word.at(0) - 97]);
 	return find(&word, start, end);
 }
 
 bool Dictionary::inDictionary(string word)
 {
-	return inTop100(word) || inTop1000(word) || inTheRest(word);
+	if (inTop100(word) || inTop1000(word) ||inTheRest(word)) {
+		foundCompares += compares;
+		compares = 0;
+		return true;
+	}
+	else {
+		notFoundCompares += compares;
+		compares = 0;
+		return false;
+	}
 }
+
+/*bool Dictionary::findMisspelled(string *word, int start, int end)
+{
+	//cout << " Find Msp " << start << " " << end << " ";
+	int length = word->length();
+	if (length > 20) length = 20;
+	int mid = (start + end) / 2;
+	int range = end - start;
+
+	misspelled[length - 1].moveCursorTo(mid);
+	Mark<string> cursor = misspelled[length - 1].getCursor();
+
+	int compare = word->compare(cursor.point->data);
+	compares++;
+
+	if (range > 3) {
+		if (compare < 0) return findMisspelled(word, start, mid - 1);
+		else if (compare > 0) return findMisspelled(word, mid + 1, end);
+		else return true;
+	}
+
+	else if (range == 3) {
+		if (compare < 0) {
+			compare = word->compare(cursor.point->prev->data);
+			compares++;
+			if (compare == 0) return true;
+			else return false;
+
+		}
+		else if (compare > 0) return findMisspelled(word, mid + 1, end);
+		else return true;
+	}
+
+	else if (range == 2) {
+		if (compare < 0) {
+			compare = word->compare(cursor.point->prev->data);
+			compares++;
+			if (compare == 0)return true;
+			else return false;
+		}
+		else if (compare > 0) {
+			compare = word->compare(cursor.point->next->data);
+			compares++;
+			if (compare == 0) return true;
+			else return false;
+		}
+		else return true;
+	}
+
+	else if (range == 1) {
+		if (compare == 0) return true;
+		else {
+			compare = word->compare(cursor.point->next->data);
+			compares++;
+			if (compare == 0) return true;
+			else return false;
+		}
+	}
+	else {
+		if (compare == 0) return true;
+		else return false;
+	}
+} */
 
 bool Dictionary::find(string *word, int start, int end)
 {
 	int mid = (start + end) / 2;
 	int range = end - start;
-	
-	words->moveCursorTo(mid);
 	Mark<string> cursor = words->getCursor();
+	words->moveCursorTo(mid);
+	cursor = words->getCursor();
+	
 	
 	int compare = word->compare(cursor.point->data);
 	compares++;
-	
+
 	if (range > 3) {
 		if (compare < 0) return find(word, start, mid - 1);
 		else if (compare > 0) return find(word, mid + 1, end);
 		else {
-			foundCompares += compares;
-			compares = 0;
 			return true;
 		}
 	}
@@ -231,20 +322,14 @@ bool Dictionary::find(string *word, int start, int end)
 			compare = word->compare(cursor.point->prev->data);
 			compares++;
 			if (compare == 0) {
-				foundCompares += compares;
-				compares = 0;
 				return true;
 			}
 			else {
-				notFoundCompares += compares;
-				compares = 0;
 				return false;
 			}
 		}
 		else if (compare > 0) return find(word, mid + 1, end);
 		else {
-			foundCompares += compares;
-			compares = 0;
 			return true;
 		}
 	}
@@ -254,13 +339,9 @@ bool Dictionary::find(string *word, int start, int end)
 			compare = word->compare(cursor.point->prev->data);
 			compares++;
 			if (compare == 0) {
-				foundCompares += compares;
-				compares = 0;
 				return true;
 			}
 			else {
-				notFoundCompares += compares;
-				compares = 0;
 				return false;
 			}
 
@@ -269,43 +350,38 @@ bool Dictionary::find(string *word, int start, int end)
 			compare = word->compare(cursor.point->next->data);
 			compares++;
 			if (compare == 0) {
-				foundCompares += compares;
-				compares = 0;
 				return true;
 			}
 			else {
-				notFoundCompares += compares;
-				compares = 0;
 				return false;
 			}
 		}
 		else {
-			foundCompares += compares;
-			compares = 0;
 			return true;
 		}
 	}
 
 	else if (range == 1) {
 		if (compare == 0) {
-			foundCompares += compares;
-			compares = 0;
 			return true;
 		}
 		else {
 			compare = word->compare(cursor.point->next->data);
 			compares++;
 			if (compare == 0) {
-				foundCompares += compares;
-				compares = 0;
 				return true;
 			}
 			else {
-				notFoundCompares += compares;
-				compares = 0;
 				return false;
 			}
-		}	
+		}
 	}
-	else return compare == 0;
+	else {
+		if (compare == 0) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
 }

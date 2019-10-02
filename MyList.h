@@ -133,7 +133,6 @@ public:
 		moveCursorTo(head);
 		for (int i = 0; i < size; i++)
 		{
-			cout << cursor.point->data << " ";
 			moveCursorRight(1);
 		}
 	}
