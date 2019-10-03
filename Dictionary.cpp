@@ -9,18 +9,16 @@ using namespace std;
 Dictionary::Dictionary(string filename)
 {
 	words = new MyList<string>();
-
-
 	string line;
 	ifstream file;
 	int length;
 	foundCompares = 0;
 	notFoundCompares = 0;
 	compares = 0;
-	int i = 0;
+
 	file.open("top100.txt");
 	if (file.is_open()) {
-		getline(file, line);
+		getline(file, line);			// Read each line and insert word into list according to length and first charcter
 		while (!file.eof())
 		{
 			cleanWord(line);
@@ -34,21 +32,17 @@ Dictionary::Dictionary(string filename)
 		if (length > 20) length = 20;
 		insertAlpha(&line, &top100[length - 1][line.at(0) - 97]);
 	}
-
 	file.close();
+
 	for (int i = 0; i < 20; i++) {
 		for (int j = 0; j < 26; j++) {
-			top100Mark[i][j].index = words->getSize();
-			if (!top100[i][j].isEmpty()) {
+			top100Mark[i][j].index = words->getSize();   //Set the corresponding marks to the heads of each list and add
+			if (!top100[i][j].isEmpty()) {				 //each list to words.
 				top100Mark[i][j].point = top100[i][j].getHead();
 				words->addList(&top100[i][j]);
 			}
 		}
-
 	}
-
-	
-
 
 	file.open("top1000.txt");
 	if (file.is_open()) {
@@ -68,8 +62,6 @@ Dictionary::Dictionary(string filename)
 	}
 	file.close();
 
-	
-
 	for (int i = 0; i < 20; i++) {
 		for (int j = 0; j < 26; j++) {
 			top1000Mark[i][j].index = words->getSize();
@@ -80,15 +72,13 @@ Dictionary::Dictionary(string filename)
 		}
 	}
 
-
-
 	file.open(filename);
 	if (file.is_open()) {
 		getline(file, line);
 		while (!file.eof())
 		{
 			cleanWord(line);
-			length = line.length();
+			length = line.length();						//Do as above but only insert word if it is not already in top100 or top1000
 			if (length > 20) length = 20;
 			if (!inTop100(line) && !inTop1000(line)) insertAlpha(&line, &theRest[length - 1][line.at(0) - 97]);
 			getline(file, line);
@@ -100,7 +90,6 @@ Dictionary::Dictionary(string filename)
 	}
 	file.close();
 
-	
 	for (int i = 0; i < 20; i++) {
 		for (int j = 0; j < 26; j++) {
 			theRestMark[i][j].index = words->getSize();
@@ -111,10 +100,7 @@ Dictionary::Dictionary(string filename)
 		}
 	}
 
-	foundCompares = 0;
-	notFoundCompares = 0;
-	compares = 0;
-	
+	compares = 0;	//Resets compare value, since this will have changed from using find when constructing
 }
 
 void Dictionary::cleanWord(string &word)
@@ -175,7 +161,6 @@ void Dictionary::insertAlpha(string *word, int start, int end, MyList<string> *l
 	}
 }
 
-
 bool Dictionary::inTop100(string word)
 {
 	int length = word.length();
@@ -234,69 +219,6 @@ bool Dictionary::inDictionary(string word)
 	}
 }
 
-/*bool Dictionary::findMisspelled(string *word, int start, int end)
-{
-	//cout << " Find Msp " << start << " " << end << " ";
-	int length = word->length();
-	if (length > 20) length = 20;
-	int mid = (start + end) / 2;
-	int range = end - start;
-
-	misspelled[length - 1].moveCursorTo(mid);
-	Mark<string> cursor = misspelled[length - 1].getCursor();
-
-	int compare = word->compare(cursor.point->data);
-	compares++;
-
-	if (range > 3) {
-		if (compare < 0) return findMisspelled(word, start, mid - 1);
-		else if (compare > 0) return findMisspelled(word, mid + 1, end);
-		else return true;
-	}
-
-	else if (range == 3) {
-		if (compare < 0) {
-			compare = word->compare(cursor.point->prev->data);
-			compares++;
-			if (compare == 0) return true;
-			else return false;
-
-		}
-		else if (compare > 0) return findMisspelled(word, mid + 1, end);
-		else return true;
-	}
-
-	else if (range == 2) {
-		if (compare < 0) {
-			compare = word->compare(cursor.point->prev->data);
-			compares++;
-			if (compare == 0)return true;
-			else return false;
-		}
-		else if (compare > 0) {
-			compare = word->compare(cursor.point->next->data);
-			compares++;
-			if (compare == 0) return true;
-			else return false;
-		}
-		else return true;
-	}
-
-	else if (range == 1) {
-		if (compare == 0) return true;
-		else {
-			compare = word->compare(cursor.point->next->data);
-			compares++;
-			if (compare == 0) return true;
-			else return false;
-		}
-	}
-	else {
-		if (compare == 0) return true;
-		else return false;
-	}
-} */
-
 bool Dictionary::find(string *word, int start, int end)
 {
 	int mid = (start + end) / 2;
@@ -310,78 +232,43 @@ bool Dictionary::find(string *word, int start, int end)
 	compares++;
 
 	if (range > 3) {
-		if (compare < 0) return find(word, start, mid - 1);
-		else if (compare > 0) return find(word, mid + 1, end);
-		else {
-			return true;
-		}
+		if (compare > 0) return find(word, mid + 1, end);
+		else if (compare < 0) return find(word, start, mid - 1);
+		else return true;
 	}
 
 	else if (range == 3) {
-		if (compare < 0) {
+		if (compare > 0) return find(word, mid + 1, end);
+		else if (compare < 0) {
 			compare = word->compare(cursor.point->prev->data);
 			compares++;
-			if (compare == 0) {
-				return true;
-			}
-			else {
-				return false;
-			}
+			return (compare == 0);
 		}
-		else if (compare > 0) return find(word, mid + 1, end);
-		else {
-			return true;
-		}
+		else return true;
 	}
 
 	else if (range == 2) {
-		if (compare < 0) {
-			compare = word->compare(cursor.point->prev->data);
-			compares++;
-			if (compare == 0) {
-				return true;
-			}
-			else {
-				return false;
-			}
-
-		}
-		else if (compare > 0) {
+		if (compare > 0) {
 			compare = word->compare(cursor.point->next->data);
 			compares++;
-			if (compare == 0) {
-				return true;
-			}
-			else {
-				return false;
-			}
+			return (compare == 0);
 		}
-		else {
-			return true;
+		else if (compare < 0) {
+			compare = word->compare(cursor.point->prev->data);
+			compares++;
+			return (compare == 0);
 		}
+		else return true;
 	}
 
 	else if (range == 1) {
-		if (compare == 0) {
-			return true;
-		}
+		if (compare == 0) return true;
 		else {
 			compare = word->compare(cursor.point->next->data);
 			compares++;
-			if (compare == 0) {
-				return true;
-			}
-			else {
-				return false;
-			}
+			return (compare == 0);
 		}
 	}
-	else {
-		if (compare == 0) {
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
+
+	else return (compare == 0);
 }

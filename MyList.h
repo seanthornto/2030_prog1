@@ -65,15 +65,15 @@ public:
 
 	//bool isEmpty();
 	//int getSize();
-	//bool moveCursorRight(int n);
-	//bool moveCursorLeft(int n);
-	//bool moveCursorTo(int index);
-	//bool moveCursorTo(Node<dtype>* node);
-	//bool moveCursorTo(Mark<dtype> mark);
-	//Node<dtype>* pushNode(dtype val);
-	//Node<dtype>* appendNode(dtype val);
-	//void deleteNode(Node<dtype>* del);
-	//Node<dtype>* getNode(int index);
+	//bool moveCursorRight(int n);									//Moves cursor right n spaces
+	//bool moveCursorLeft(int n);									//Moves cursor left n spaces
+	//bool moveCursorTo(int index);									//Moves cursor to a specified index using above functions
+	//bool moveCursorTo(Node<dtype>* node);							//Finds node index a moves cursor to it using above function
+	//bool moveCursorTo(Mark<dtype> mark);							//Moves cursor directly to a marked node, without using above functions
+	//Node<dtype>* pushNode(dtype val);								//Inserts node with data val at begining of list
+	//Node<dtype>* appendNode(dtype val);							//Inserts node with data val at end of list
+	//void deleteNode(Node<dtype>* del);							//Deletets node from list
+	//Node<dtype>* getNode(int index);								//Returns 
 	//int getIndex(Node<dtype>* node);
 	//Node<dtype>* insertBefore(Node<dtype>* nextNode, dtype data);
 	//Node<dtype>* insertAfter(Node<dtype>* prevNode, dtype data);

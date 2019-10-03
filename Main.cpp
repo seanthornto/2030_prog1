@@ -65,8 +65,9 @@ int main()
 	string word;
 	vector<string> splitLine;
 
-	time.Start();
+	time.Start(); 
 
+	// ----------- SPELLCHECKING BEGINS HERE -----------
 	file.open("book.txt");
 	if (file.is_open()) {
 		getline(file, line);
@@ -79,12 +80,12 @@ int main()
 		checkLine(splitLine);
 	}
 	file.close();
+	// ----------- SPELLCHECKING ENDS HERE -----------
 
 	time.Stop();
 
 	foundCompares = dictionary->getFoundCompares();
 	notFoundCompares = dictionary->getNotFoundCompares();
-	
 
 	cout << "Done checking and these are the results" << endl;
 	cout << "finished in time: " << time.Time() << endl;
