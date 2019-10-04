@@ -81,7 +81,7 @@ public:
 	Mark<dtype> getCursor();
 	Node<dtype>* getHead();
 	Node<dtype>* getTail();
-	void addList(MyList<dtype> listA);
+	void addList(MyList<dtype>* list);
 	void print();
 
 	bool isEmpty()
