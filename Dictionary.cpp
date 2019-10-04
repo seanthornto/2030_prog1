@@ -24,13 +24,13 @@ Dictionary::Dictionary(string filename)
 			cleanWord(line);
 			length = line.length();
 			if (length > 20) length = 20;
-			insertAlpha(&line, &top100[length - 1][line.at(0) - 97]);
+			if (line != "") insertAlpha(&line, &top100[length - 1][line.at(0) - 97]);
 			getline(file, line);
 		}
 		cleanWord(line);
 		length = line.length();
 		if (length > 20) length = 20;
-		insertAlpha(&line, &top100[length - 1][line.at(0) - 97]);
+		if (line != "") insertAlpha(&line, &top100[length - 1][line.at(0) - 97]);
 	}
 	file.close();
 
@@ -52,13 +52,13 @@ Dictionary::Dictionary(string filename)
 			cleanWord(line);
 			length = line.length();
 			if (length > 20) length = 20;
-			insertAlpha(&line, &top1000[length - 1][line.at(0) - 97]);
+			if (line != "") insertAlpha(&line, &top1000[length - 1][line.at(0) - 97]);
 			getline(file, line);
 		}
 		cleanWord(line);
 		length = line.length();
 		if (length > 20) length = 20;
-		insertAlpha(&line, &top1000[length - 1][line.at(0) - 97]);
+		if (line != "") insertAlpha(&line, &top1000[length - 1][line.at(0) - 97]);
 	}
 	file.close();
 
@@ -80,13 +80,13 @@ Dictionary::Dictionary(string filename)
 			cleanWord(line);
 			length = line.length();						//Do as above but only insert word if it is not already in top100 or top1000
 			if (length > 20) length = 20;
-			if (!inTop100(line) && !inTop1000(line)) insertAlpha(&line, &theRest[length - 1][line.at(0) - 97]);
+			if (line != "" && !inTop100(line) && !inTop1000(line)) insertAlpha(&line, &theRest[length - 1][line.at(0) - 97]);
 			getline(file, line);
 		}
 		cleanWord(line);
 		length = line.length();
 		if (length > 20) length = 20;
-		if (!inTop100(line) && !inTop1000(line)) insertAlpha(&line, &theRest[length - 1][line.at(0) - 97]);
+		if (line != "" && !inTop100(line) && !inTop1000(line)) insertAlpha(&line, &theRest[length - 1][line.at(0) - 97]);
 	}
 	file.close();
 
