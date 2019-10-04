@@ -6,6 +6,6 @@ Name: Sean Thornton
 
 Competing: YES
 
-Best run time: 40.659 seconds (On personal machine)
+Best run time: 9.72 seconds (On linux system)
 
 Anything that doesn't work:
