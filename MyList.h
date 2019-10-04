@@ -55,7 +55,7 @@ public:
 		cursor.index = -1;
 	}
 
-	~MyList() 
+	~MyList()
 	{
 		while (!isEmpty())
 		{
@@ -63,26 +63,26 @@ public:
 		}
 	};
 
-	bool isEmpty();
-	int getSize();
-	bool moveCursorRight(int n);
-	bool moveCursorLeft(int n);
-	bool moveCursorTo(int index);
-	bool moveCursorTo(Node<dtype>* node);
-	bool moveCursorTo(Mark<dtype> mark);
-	Node<dtype>* pushNode(dtype val);
-	Node<dtype>* appendNode(dtype val);
-	void deleteNode(Node<dtype>* del);
-	Node<dtype>* getNode(int index);
-	int getIndex(Node<dtype>* node);
-	Node<dtype>* insertBefore(Node<dtype>* nextNode, dtype data);
-	Node<dtype>* insertAfter(Node<dtype>* prevNode, dtype data);
-	Node<dtype>* insertAt(int index, dtype data);
-	Mark<dtype> getCursor();
-	Node<dtype>* getHead();
-	Node<dtype>* getTail();
-	void addList(MyList<dtype>* list);
-	void print();
+	//bool isEmpty();
+	//int getSize();
+	//bool moveCursorRight(int n);									//Moves cursor right n spaces
+	//bool moveCursorLeft(int n);									//Moves cursor left n spaces
+	//bool moveCursorTo(int index);									//Moves cursor to a specified index using above functions
+	//bool moveCursorTo(Node<dtype>* node);							//Finds node index a moves cursor to it using above function
+	//bool moveCursorTo(Mark<dtype> mark);							//Moves cursor directly to a marked node, without using above functions
+	//Node<dtype>* pushNode(dtype val);								//Inserts node with data val at begining of list
+	//Node<dtype>* appendNode(dtype val);							//Inserts node with data val at end of list
+	//void deleteNode(Node<dtype>* del);							//Deletets node from list
+	//Node<dtype>* getNode(int index);								//Returns 
+	//int getIndex(Node<dtype>* node);
+	//Node<dtype>* insertBefore(Node<dtype>* nextNode, dtype data);
+	//Node<dtype>* insertAfter(Node<dtype>* prevNode, dtype data);
+	//Node<dtype>* insertNode(int index, dtype data);
+	//Mark<dtype> getCursor();
+	//Node<dtype>* getHead();
+	//Node<dtype>* getTail();
+	//void addList(MyList<dtype> listA);
+	//void print();
 
 	bool isEmpty()
 	{
@@ -96,6 +96,7 @@ public:
 
 	bool moveCursorRight(int n)
 	{
+		
 		for (int i = 0; i < n; i++) {
 			if (cursor.point == tail) return false;
 			cursor.point = cursor.point->next;
@@ -121,10 +122,24 @@ public:
 			return moveCursorLeft(cursor.index - index);
 		}
 		else if (index > cursor.index)
-		{
+		{	
 			return moveCursorRight(index - cursor.index);
 		}
 		return true;
+	}
+
+	void print()
+	{
+		moveCursorTo(head);
+		for (int i = 0; i < size; i++)
+		{
+			moveCursorRight(1);
+		}
+	}
+
+	void resetCursor()
+	{
+		moveCursorTo(head);
 	}
 
 	bool moveCursorTo(Node<dtype>* node)
@@ -142,8 +157,6 @@ public:
 		cursor = mark;
 		return true;
 	}
-
-	
 
 	Node<dtype>* pushNode(dtype val)
 	{
@@ -200,7 +213,7 @@ public:
 		else if (del == cursor.point) cursor.point = cursor.point->next; //If the node the cursor is pointing to is being deleted, move the cursor right
 
 		if (del == head)							//If the head is being deleted
-		{	
+		{
 			if (size == 1)							//If it is the only node
 			{
 				head = nullptr;						//Set head and tail to null
@@ -210,17 +223,18 @@ public:
 			{
 				head = head->next;					//Otherwise set the head to the next node
 				head->prev = nullptr;
+
 			}
 
 		}
-		else if (del == tail)						//Do similarly for tail
+		else if (del == tail)
 		{
 			tail = tail->prev;
 			tail->next = nullptr;
 
 		}
-		else                                        //If it's not the head or the tail, the node is flanked by two
-		{											//other nodes. Set the flanking nodes' next and prev to eachother
+		else
+		{
 			del->next->prev = del->prev;
 			del->prev->next = del->next;
 		}
@@ -271,7 +285,10 @@ public:
 	Node<dtype>* insertAfter(Node<dtype>* prevNode, dtype data)
 	{
 		if (getIndex(prevNode) < cursor.index) cursor.index++;
-		if (prevNode == tail) return appendNode(data);
+		if (prevNode == tail)
+		{
+			return appendNode(data);
+		}
 		Node<dtype> *newNode = new Node<dtype>;
 		newNode->data = data;
 		newNode->next = prevNode->next;
@@ -287,7 +304,10 @@ public:
 	Node<dtype>* insertBefore(Node<dtype>* nextNode, dtype data)
 	{
 		if (getIndex(nextNode) <= cursor.index) cursor.index++;
-		if (nextNode == head) return pushNode(data);
+		if (nextNode == head)
+		{
+			return pushNode(data);
+		}
 		Node<dtype> *newNode = new Node<dtype>;
 		newNode->data = data;
 		newNode->prev = nextNode->prev;
@@ -300,7 +320,7 @@ public:
 		return newNode;
 	}
 
-	Node<dtype>* insertAt(int index, dtype data)
+	Node<dtype>* insertNode(int index, dtype data)
 	{
 		if (index == 0)
 			return pushNode(data);
@@ -334,20 +354,15 @@ public:
 				tail = list->tail;
 			}
 			else {
-			tail->next = list->head;
-			tail = list->tail;
+				tail->next = list->head;
+				tail = list->tail;
 			}
 		}
 		size += list->size;
+
 	}
 
-	void print()
-	{
-		moveCursorTo(head);
-		for (int i = 0; i < size; i++)
-		{
-			cout << cursor.point->data << " ";
-			moveCursorRight(1);
-		}
-	}
+};
+
+
 #endif
